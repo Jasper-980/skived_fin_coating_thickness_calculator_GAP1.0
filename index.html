@@ -1,0 +1,2393 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <title>Skived Fin Coating 膜厚計算器</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --blue: #2563eb;
+      --yellow: #fff200;
+      --soft: #f8fafc;
+    }
+    * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+  font-size: 19px;
+  line-height: 1.05;
+  margin: 0 0 4px;
+  border-bottom: 2.2px solid #2563eb;
+  padding-bottom: 3px;
+}
+    h2 {
+  font-size: 12.4px;
+  line-height: 1.05;
+  margin: 3px 0 3px;
+}
+    p { color: var(--muted); line-height: 1.6; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    @media (max-width: 900px) {
+      .grid-2, .grid-6 { grid-template-columns: 1fr; }
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font-size: 14px;
+      background: white;
+    overflow: hidden;
+    }
+    textarea {
+      min-height: 180px;
+      font-family: Consolas, monospace;
+      font-size: 9px;
+      resize: vertical;
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--blue);
+      color: white;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+    button.secondary { background: var(--blue); color: white; }
+    .filebox { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+    .filebox input[type=file] { max-width: 310px; padding: 7px; background: #fff; }
+    button.danger { background: var(--blue); color: white; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .save-status {
+      font-size: 13px;
+      color: #475569;
+      width: 100%;
+      margin-top: 4px;
+    }
+    .table-wrap { overflow-x: auto; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 820px;
+      background: white;
+    overflow: hidden;
+    }
+    th, td {
+      border: 1px solid #9ca3af;
+      padding: 7px;
+      text-align: center;
+      font-size: 14px;
+    }
+    th { background: #f3f4f6; }
+    .yellow { background: var(--yellow) !important; }
+    .blue-text { color: blue; }
+    .avg-row th, .avg-row td { color: red; font-weight: 800; font-size: 18px; background: #fff !important; }
+    .stat-table {
+      min-width: 0;
+    }
+    .stat-table th, .stat-table td {
+      font-size: 16px;
+      padding: 5px;
+    }
+    .result-actions { text-align: right; margin-bottom: 4px; }
+    .result-actions button { margin-top: 0; }
+    .small { font-size: 13px; color: var(--muted); }
+    .manual input {
+      width: 86px;
+      text-align: center;
+      padding: 5px;
+    }
+    .heat-empty { background: #f8fafc; color: #cbd5e1; }
+    .heat-1 { background: #bbf7d0; }
+    .heat-2 { background: #86efac; }
+    .heat-3 { background: #fef08a; }
+    .heat-4 { background: #fdba74; }
+    .heat-5 { background: #fca5a5; }
+    .plotly-panel {
+      width: 100%;
+      height: 720px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: white;
+      overflow: hidden;
+    }
+    canvas.chart-canvas {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: white;
+    overflow: hidden;
+      display: block;
+    }
+    .report-note { color: #475569; font-size: 13px; }
+    .viz-actions {
+      text-align: right;
+      margin-bottom: 4px;
+    }
+    .note {
+      background: #f8fafc;
+      border-left: 5px solid var(--blue);
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: #374151;
+    }
+  
+  .report-container {
+    width: 100%;
+    transform-origin: top left;
+  }
+
+  @media print {
+    body {
+      zoom: 0.92;
+    }
+  }
+
+
+.heatmap-table {
+  width: auto !important;
+  margin: 0 auto;
+}
+
+.heatmap-table th:first-child,
+.heatmap-table td:first-child {
+  width: 30mm !important;
+}
+
+.heatmap-table th,
+.heatmap-table td {
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+@media print {
+  html, body {
+    width: 297mm !important;
+    height: 210mm !important;
+    overflow: hidden;
+  }
+
+  body {
+    zoom: 0.82;
+    margin: 0 !important;
+  }
+
+  .report-root {
+    width: 100%;
+    height: 100%;
+    page-break-after: avoid;
+    page-break-before: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+
+
+    .cloud-panel { background:#eef6ff; border:1px solid #bfdbfe; border-radius:12px; padding:10px 12px; margin-top:10px; }
+    .cloud-panel b { color:#1e40af; }
+    .cloud-small { font-size:12px; color:#475569; line-height:1.5; }
+
+</style>
+</head>
+<body>
+<div class='report-root'>
+  <div class="wrap">
+    <div class="toolbar">
+      <div>
+        <h1>Skived Fin Coating 膜厚計算器</h1>
+        <p>貼上 coating 前 / 後雷射高度資料，自動計算 12 個位置 × 4 筆量測值的膜厚分佈。</p>
+      </div>
+      <div class="btn-row">
+        <button class="secondary" onclick="loadExample()">載入範例資料</button>
+        <button class="secondary" onclick="copyShareLink()">複製分享連結</button>
+        <button class="secondary" onclick="configureCloudApi()">設定雲端API</button>
+        <button class="secondary" onclick="saveToCloud()">雲端儲存</button>
+        <button class="secondary" onclick="openCloudSearch()">雲端載入/查詢</button>
+        <button class="secondary" onclick="copyCloudShareLink()">複製雲端短連結</button>
+        <button onclick="downloadCSV()">匯出 CSV</button>
+        <button class="danger" onclick="clearAll()">清空</button>
+        <div id="saveStatus" class="save-status"></div>
+        <div class="cloud-panel">
+          <b>Notion 雲端資料庫模式</b>
+          <div class="cloud-small">先按「設定雲端API」填入 Cloudflare Worker 網址。儲存成功後會取得短網址 ID，可用「雲端載入/查詢」或分享連結載入。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>測試條件</h2>
+      <div class="grid grid-6">
+        <div><label>樣品 / GAP</label><input id="sample" value="GAP 1.0"></div>
+        <div><label>Coating 條件</label><input id="coating" value="200 µm"></div>
+        <div>
+          <label>Date</label>
+          <input id="date" type="date" value="2026-05-12">
+          
+        </div>
+        <div><label>Time</label><input id="time" value="12:00"></div>
+        <div><label>操作者</label><input id="operator" placeholder="可留空"></div>
+        <div><label>備註</label><input id="remark" placeholder="可留空"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h2>1. 貼上 coating 前高度資料</h2>
+        <p class="small" style="margin-top:2px;">可直接貼雷射輸出表格。系統會依上到下順序對應位置 1–12，並抓每列最後 4 個數字。</p>
+        <textarea id="beforePaste" placeholder="可貼整份雷射輸出 CSV / 表格，也可只貼 12 列 × 4 欄數值"></textarea>
+        <button onclick="applyPaste('before')">套用 coating 前資料</button>
+        <div class="filebox">
+          <input type="file" id="beforeFile" accept=".csv,.txt" />
+          <button class="secondary" onclick="importCSV('before')">匯入 coating 前 CSV</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. 貼上 coating 後高度資料</h2>
+        <p class="small" style="margin-top:2px;">可直接貼雷射輸出表格。系統會依相同位置與 coating 前資料逐項相減。</p>
+        <textarea id="afterPaste" placeholder="可貼整份雷射輸出 CSV / 表格，也可只貼 12 列 × 4 欄數值"></textarea>
+        <button onclick="applyPaste('after')">套用 coating 後資料</button>
+        <div class="filebox">
+          <input type="file" id="afterFile" accept=".csv,.txt" />
+          <button class="secondary" onclick="importCSV('after')">匯入 coating 後 CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="grid-template-columns: 1fr 340px;">
+      <div class="card">
+        <h2>位置膜厚熱圖，單位：µm</h2>
+        <div class="result-actions">
+          <button onclick="downloadResultCSV()">匯出結果 CSV</button>
+          <button class="secondary" onclick="downloadResultExcel()">匯出結果 Excel</button>
+          <button onclick="exportPDFReport()">匯出 PDF 報告</button>
+        </div>
+        <div class="table-wrap">
+          <table id="heatTable"></table>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h2 class="blue-text" style="text-align:center;">測試條件</h2>
+          <table class="stat-table">
+            <tbody>
+              <tr><td>GAP</td><td class="blue-text" id="condSample"></td></tr>
+              <tr><td>Coating</td><td class="blue-text" id="condCoating"></td></tr>
+              <tr><td>Date</td><td class="blue-text" id="condDate"></td></tr>
+              <tr><td>Time</td><td class="blue-text" id="condTime"></td></tr>
+              <tr><td>操作者</td><td class="blue-text" id="condOperator"></td></tr>
+              <tr><td>備註</td><td class="blue-text" id="condRemark"></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2 class="blue-text" style="text-align:center;">整體分析</h2>
+          <table class="stat-table">
+            <thead>
+              <tr><th>Mean</th><th>STD</th><th>CV</th><th>Max</th><th>Min</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="blue-text" id="meanCell">—</td>
+                <td class="blue-text" id="stdCell">—</td>
+                <td class="blue-text" id="cvCell">—</td>
+                <td class="blue-text" id="maxCell">—</td>
+                <td class="blue-text" id="minCell">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h2>3D 色溫圖（依目前輸入數據即時生成）</h2>
+        <p class="small" style="margin-top:2px;">外框代表 skived fin，內部顏色與高度起伏依據「位置膜厚熱圖」數據自動繪製。</p>
+        <div class="viz-actions">
+          <button class="secondary" onclick="downloadCanvasPNG('surfaceCanvas', 'skived_fin_3d_heatmap.png')">匯出 3D 色溫圖 PNG</button>
+        </div>
+        <canvas id="surfaceCanvas" class="chart-canvas" width="1000" height="720"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="chart-title">膜厚統計分布</div>
+        <p class="small" style="margin-top:2px;">將所有有效膜厚數據進行區間統計，觀察整體分布是否集中或偏斜。</p>
+        <div class="viz-actions">
+          <button class="secondary" onclick="downloadCanvasPNG('histCanvas', 'skived_fin_thickness_distribution.png')">匯出分布圖 PNG</button>
+        </div>
+        <canvas id="histCanvas" class="chart-canvas" width="1000" height="650"></canvas>
+      </div>
+    </div>
+
+
+    <div class="card">
+      <h2>3D膜厚曲面圖</h2>
+      <p class="small" style="margin-top:2px;">
+        使用 Plotly.js WebGL 即時生成；圖中標示左／右／上／下位置，並會跟著 3D 圖一起旋轉。
+      </p>
+      <div class="viz-actions">
+        <button class="secondary" onclick="resetPlotlyTopView()">復位俯視圖</button>
+        <button class="secondary" onclick="downloadPlotlyPNG()">匯出 WebGL 3D 圖 PNG</button>
+      </div>
+      <div id="plotly3d" class="plotly-panel"></div>
+    </div>
+
+    <div class="card">
+      <h2>5. 原始輸入與逐點計算結果</h2>
+      <div class="table-wrap">
+        <table id="manualTable" class="manual"></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="note">
+        <b>目前計算假設：</b><br>
+        1. 圖三與圖四每列順序皆為位置 1 到 12。<br>
+        2. 每個位置有 4 筆高度：水平線1-溝槽1、水平線1-溝槽2、水平線2-溝槽1、水平線2-溝槽2。<br>
+        3. 膜厚公式目前使用 <b>|coating 前高度 − coating 後高度|</b>。<br>
+        4. STD 使用樣本標準差，也就是除以 n-1；CV = STD / Mean × 100%。<br>
+      </div>
+    </div>
+  </div>
+
+<script>
+const POSITIONS = Array.from({length: 12}, (_, i) => i + 1);
+const KEYS = ["h1g1", "h1g2", "h2g1", "h2g2"];
+const KEY_LABELS = ["水平線1-1", "水平線1-2", "水平線2-1", "水平線2-2"];
+const YS = ["上", "中1", "中2", "下"];
+const XS = ["左", "中", "右"];
+
+const positionMap = {
+  1: {y:"上", x:"左"}, 2: {y:"上", x:"中"}, 3: {y:"上", x:"右"},
+  4: {y:"中1", x:"左"}, 5: {y:"中1", x:"中"}, 6: {y:"中1", x:"右"},
+  7: {y:"中2", x:"左"}, 8: {y:"中2", x:"中"}, 9: {y:"中2", x:"右"},
+  10: {y:"下", x:"左"}, 11: {y:"下", x:"中"}, 12: {y:"下", x:"右"}
+};
+
+
+
+
+
+let rows = POSITIONS.map(p => ({
+  position: p,
+  before: {h1g1:"", h1g2:"", h2g1:"", h2g2:""},
+  after: {h1g1:"", h1g2:"", h2g1:"", h2g2:""}
+}));
+
+const beforeExample = `3004.1\t2986.032\t2986.799\t3014.506
+2976.642\t2985.309\t2999.144\t2996.844
+2992.049\t3010.745\t3007.703\t2997.853
+1981.488\t1979.634\t1969.119\t1982.519
+1950.553\t1955.904\t1968.528\t1972.552
+1994.48\t1987.268\t2000.829\t2010.671
+1999.732\t2000.193\t1988.358\t1988.31
+2012.702\t2009.031\t1979.732\t1975.584
+2018.627\t2035.039\t1973.89\t1974.301
+3012.165\t3003.176\t2981.763\t3006.032
+2964.132\t2988.682\t2950.017\t2987.694
+2998.562\t2993.172\t3016.734\t3010.322`;
+
+const afterExample = `2730.657\t2748.558\t2755.786\t2769.742
+2762.383\t2763.06\t2751.253\t2744.875
+2765.006\t2765.553\t2758.865\t2771.723
+1724.887\t1731.875\t1717.08\t1725.723
+1759.37\t1768.99\t1743.515\t1741.459
+1756.955\t1759.433\t1755.342\t1755.371
+1730.552\t1738.722\t1722.69\t1727.924
+1741.503\t1753.118\t1761.682\t1754.585
+1709.95\t1708.629\t1750.09\t1746.805
+2726.322\t2734.28\t2758.627\t2754.086
+2758.749\t2770.139\t2756.547\t2744.532
+2763.765\t2764.093\t2772.18\t2772.971`;
+
+function num(v) {
+  if (v === "" || v === null || v === undefined) return null;
+  const n = Number(String(v).replace(/,/g, "").trim());
+  return Number.isFinite(n) ? n : null;
+}
+
+function fmt(v, d=3) {
+  if (v === null || v === undefined || Number.isNaN(v)) return "—";
+  return Number(v).toFixed(d).replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1");
+}
+
+function avg(arr) {
+  const a = arr.filter(v => v !== null && Number.isFinite(v));
+  if (!a.length) return null;
+  return a.reduce((s, v) => s + v, 0) / a.length;
+}
+
+function stdSample(arr) {
+  const a = arr.filter(v => v !== null && Number.isFinite(v));
+  if (a.length < 2) return null;
+  const m = avg(a);
+  return Math.sqrt(a.reduce((s, v) => s + Math.pow(v - m, 2), 0) / (a.length - 1));
+}
+
+function splitCSVLine(line) {
+  const cells = [];
+  let cur = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if ((ch === "," || ch === "\t") && !inQuotes) {
+      cells.push(cur.trim());
+      cur = "";
+    } else {
+      cur += ch;
+    }
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
+function getPositionFromCells(cells) {
+  const joined = cells.join(" ");
+  const patterns = [
+    /_(\d{1,2})(?:\D*)$/,
+    /檢[_\s-]*(\d{1,2})(?:\D*)$/,
+    /No\.?\s*\d*[_-](\d{1,2})(?:\D*)$/i
+  ];
+  for (const p of patterns) {
+    const m = joined.match(p);
+    if (m) {
+      const n = Number(m[1]);
+      if (n >= 1 && n <= 12) return n;
+    }
+  }
+  return null;
+}
+
+function isHeaderLike(cells) {
+  const joined = cells.join(" ");
+  return /量測數據|輪廓量測|水平線|輪廓線圖|量測值|調色板|雷射|彩3D|µm|μm|um/i.test(joined);
+}
+
+function numericValuesFromCells(cells) {
+  const values = [];
+  cells.forEach(cell => {
+    const raw = String(cell).replace(/,/g, "").trim();
+    if (/^-?\d+(?:\.\d+)?$/.test(raw)) values.push(Number(raw));
+  });
+  return values;
+}
+
+function isMeasurementNumericRow(nums) {
+  // 雷射高度資料通常是數百～數千 µm。
+  // 這裡用來排除 CSV 表頭中的 1、2、1、2，避免整份資料往下錯一列。
+  if (!nums || nums.length < 4) return false;
+  return nums.slice(-4).some(v => Math.abs(v) > 100);
+}
+
+function parsePastedData(text) {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const parsedRows = lines.map(line => splitCSVLine(line));
+
+  // 優先：CSV / 雷射輸出表格，有檔名或列名可判斷 _1 ~ _12
+  const identified = [];
+  parsedRows.forEach(cells => {
+    const pos = getPositionFromCells(cells);
+    const nums = numericValuesFromCells(cells);
+    if (pos && nums.length >= 4 && isMeasurementNumericRow(nums)) {
+      identified.push({ position: pos, values: nums.slice(-4) });
+    }
+  });
+
+  if (identified.length >= 12) {
+    const byPos = {};
+    identified.forEach(r => { byPos[r.position] = r.values; });
+    return POSITIONS.map(p => {
+      const source = byPos[p] || [];
+      return {
+        h1g1: source[0] ?? "",
+        h1g2: source[1] ?? "",
+        h2g1: source[2] ?? "",
+        h2g2: source[3] ?? ""
+      };
+    });
+  }
+
+  // 第二優先：純 12 列 × 4 欄數字，或貼上沒有列名的資料
+  const numericRows = [];
+  parsedRows.forEach(cells => {
+    const nums = numericValuesFromCells(cells);
+    const hasText = cells.some(c => /[A-Za-z\u4e00-\u9fff]/.test(c));
+    if (nums.length >= 4 && isMeasurementNumericRow(nums) && !isHeaderLike(cells) && (!hasText || nums.length > 4)) {
+      numericRows.push(nums.slice(-4));
+    }
+  });
+
+  // 如果前面仍抓不到，才用寬鬆模式，但會排除表頭，避免把「1,2,1,2」當成位置 1 的資料
+  if (numericRows.length < 12) {
+    parsedRows.forEach(cells => {
+      if (isHeaderLike(cells)) return;
+      const nums = numericValuesFromCells(cells);
+      if (nums.length >= 4 && isMeasurementNumericRow(nums)) numericRows.push(nums.slice(-4));
+    });
+  }
+
+  return POSITIONS.map((p, idx) => {
+    const source = numericRows[idx] || [];
+    return {
+      h1g1: source[0] ?? "",
+      h1g2: source[1] ?? "",
+      h2g1: source[2] ?? "",
+      h2g2: source[3] ?? ""
+    };
+  });
+}
+
+function importCSV(phase) {
+  const fileInput = document.getElementById(phase === "before" ? "beforeFile" : "afterFile");
+  const file = fileInput.files && fileInput.files[0];
+  if (!file) {
+    alert("請先選擇 CSV 檔");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    document.getElementById(phase === "before" ? "beforePaste" : "afterPaste").value = text;
+    const parsed = parsePastedData(text);
+    rows = rows.map((r, idx) => ({...r, [phase]: parsed[idx]}));
+    render();
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+function calculate() {
+  return rows.map(r => {
+    const thickness = {};
+    KEYS.forEach(k => {
+      const b = num(r.before[k]);
+      const a = num(r.after[k]);
+      thickness[k] = (b !== null && a !== null) ? Math.abs(b - a) : null;
+    });
+    return {
+      ...r,
+      ...positionMap[r.position],
+      thickness,
+      posAvg: avg(KEYS.map(k => thickness[k]))
+    };
+  });
+}
+
+function heatClass(value, min, max) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "heat-empty";
+  if (min === max) return "heat-3";
+  const ratio = (value - min) / (max - min);
+  if (ratio < 0.2) return "heat-1";
+  if (ratio < 0.4) return "heat-2";
+  if (ratio < 0.6) return "heat-3";
+  if (ratio < 0.8) return "heat-4";
+  return "heat-5";
+}
+
+function render() {
+  const results = calculate();
+  const values = results.flatMap(r => KEYS.map(k => r.thickness[k])).filter(v => v !== null);
+  const mean = avg(values);
+  const sd = stdSample(values);
+  const cv = mean ? sd / mean * 100 : null;
+  const min = values.length ? Math.min(...values) : null;
+  const max = values.length ? Math.max(...values) : null;
+
+  document.getElementById("condSample").textContent = document.getElementById("sample").value || "—";
+  document.getElementById("condCoating").textContent = document.getElementById("coating").value || "—";
+  const rawDate = document.getElementById("date").value;
+  document.getElementById("condDate").textContent = rawDate ? rawDate.replaceAll("-", "/") : "—";
+  document.getElementById("condTime").textContent = document.getElementById("time").value || "—";
+  document.getElementById("condOperator").textContent = document.getElementById("operator").value || "—";
+  document.getElementById("condRemark").textContent = document.getElementById("remark").value || "—";
+  document.getElementById("meanCell").textContent = fmt(mean, 1);
+  document.getElementById("stdCell").textContent = fmt(sd, 1);
+  document.getElementById("cvCell").textContent = cv === null ? "—" : fmt(cv, 1) + "%";
+  document.getElementById("maxCell").textContent = max === null ? "—" : fmt(max, 1);
+  document.getElementById("minCell").textContent = min === null ? "—" : fmt(min, 1);
+
+  const heatTable = document.getElementById("heatTable");
+  let html = `
+    <thead>
+      <tr>
+        <th class="yellow">位置膜厚</th>
+        <th colspan="2">左</th>
+        <th colspan="2">中</th>
+        <th colspan="2">右</th>
+      </tr>
+      <tr>
+        <th>y-axis / x-axis</th>
+        <th>fin 1</th><th>fin 2</th>
+        <th>fin 1</th><th>fin 2</th>
+        <th>fin 1</th><th>fin 2</th>
+      </tr>
+    </thead><tbody>
+  `;
+
+  YS.forEach(y => {
+    html += `<tr><th>水平線1<br>${y}</th>`;
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      ["h1g1", "h1g2"].forEach(k => {
+        html += `<td class="${heatClass(r?.thickness[k], min, max)}"><b>${fmt(r?.thickness[k])}</b></td>`;
+      });
+    });
+    html += `</tr>`;
+
+    html += `<tr><th>水平線2<br>${y}</th>`;
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      ["h2g1", "h2g2"].forEach(k => {
+        html += `<td class="${heatClass(r?.thickness[k], min, max)}"><b>${fmt(r?.thickness[k])}</b></td>`;
+      });
+    });
+    html += `</tr>`;
+  });
+  const columnAvgCells = [];
+  XS.forEach(x => {
+    ["h1g1", "h1g2"].forEach(k => {
+      const colValues = results
+        .filter(r => r.x === x)
+        .map(r => r.thickness[k])
+        .filter(v => v !== null && Number.isFinite(v));
+      columnAvgCells.push(avg(colValues));
+    });
+  });
+  html += `<tr class="avg-row"><th>Avg</th>`;
+  columnAvgCells.forEach(v => {
+    html += `<td class="avg-cell"><b>${fmt(v, 3)}</b></td>`;
+  });
+  html += `</tr>`;
+
+  html += `</tbody>`;
+  heatTable.innerHTML = html;
+
+  const manual = document.getElementById("manualTable");
+  let m = `
+    <thead>
+      <tr>
+        <th rowspan="2">位置</th>
+        <th colspan="4">coating 前高度</th>
+        <th colspan="4">coating 後高度</th>
+        <th colspan="4" class="yellow">膜厚 = |前 - 後|</th>
+        <th rowspan="2">位置平均</th>
+      </tr>
+      <tr>
+        ${[...KEY_LABELS, ...KEY_LABELS, ...KEY_LABELS].map(x => `<th>${x}</th>`).join("")}
+      </tr>
+    </thead><tbody>
+  `;
+
+  rows.forEach((row, idx) => {
+    const r = results[idx];
+    m += `<tr><th>${row.position}</th>`;
+    KEYS.forEach(k => {
+      m += `<td><input value="${row.before[k]}" onchange="updateCell(${idx}, 'before', '${k}', this.value)"></td>`;
+    });
+    KEYS.forEach(k => {
+      m += `<td><input value="${row.after[k]}" onchange="updateCell(${idx}, 'after', '${k}', this.value)"></td>`;
+    });
+    KEYS.forEach(k => {
+      m += `<td class="${heatClass(r.thickness[k], min, max)}"><b>${fmt(r.thickness[k])}</b></td>`;
+    });
+    m += `<td><b>${fmt(r.posAvg)}</b></td></tr>`;
+  });
+  m += `</tbody>`;
+  manual.innerHTML = m;
+  drawGeneratedCharts(results, values);
+  drawPlotlySurface(results, values);
+}
+
+function updateCell(index, phase, key, value) {
+  rows[index][phase][key] = value;
+  render();
+}
+
+function applyPaste(phase) {
+  const text = document.getElementById(phase === "before" ? "beforePaste" : "afterPaste").value;
+  const parsed = parsePastedData(text);
+  rows = rows.map((r, idx) => ({...r, [phase]: parsed[idx]}));
+  render();
+}
+
+function loadExample() {
+  document.getElementById("beforePaste").value = beforeExample;
+  document.getElementById("afterPaste").value = afterExample;
+  const b = parsePastedData(beforeExample);
+  const a = parsePastedData(afterExample);
+  rows = rows.map((r, idx) => ({
+    ...r,
+    before: b[idx],
+    after: a[idx]
+  }));
+  render();
+}
+
+function clearAll() {
+  rows = POSITIONS.map(p => ({
+    position: p,
+    before: {h1g1:"", h1g2:"", h2g1:"", h2g2:""},
+    after: {h1g1:"", h1g2:"", h2g1:"", h2g2:""}
+  }));
+  document.getElementById("beforePaste").value = "";
+  document.getElementById("afterPaste").value = "";
+  render();
+}
+
+function getResultSummary() {
+  const results = calculate();
+  const values = results.flatMap(r => KEYS.map(k => r.thickness[k])).filter(v => v !== null);
+  const mean = avg(values);
+  const sd = stdSample(values);
+  const cv = mean ? sd / mean * 100 : null;
+  return { results, values, mean, sd, cv };
+}
+
+function downloadResultCSV() {
+  const { results, mean, sd, cv, values } = getResultSummary();
+  const lines = [];
+
+  lines.push(["測試條件"].join(","));
+  lines.push(["GAP", document.getElementById("sample").value || ""].join(","));
+  lines.push(["Coating", document.getElementById("coating").value || ""].join(","));
+  lines.push(["Date", (document.getElementById("date").value || "").replaceAll("-", "/")].join(","));
+  lines.push(["Time", document.getElementById("time").value || ""].join(","));
+  lines.push(["操作者", document.getElementById("operator").value || ""].join(","));
+  lines.push(["備註", document.getElementById("remark").value || ""].join(","));
+  lines.push("");
+
+  lines.push(["位置膜厚"].join(","));
+  lines.push(["Y", "左 fin1", "左 fin2", "中 fin1", "中 fin2", "右 fin1", "右 fin2"].join(","));
+  YS.forEach(y => {
+    const row1 = [`水平線1 ${y}`];
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      row1.push(fmt(r?.thickness.h1g1), fmt(r?.thickness.h1g2));
+    });
+    lines.push(row1.join(","));
+
+    const row2 = [`水平線2 ${y}`];
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      row2.push(fmt(r?.thickness.h2g1), fmt(r?.thickness.h2g2));
+    });
+    lines.push(row2.join(","));
+  });
+
+  const avgRow = ["Avg"];
+  XS.forEach(x => {
+    ["h1g1", "h1g2"].forEach(k => {
+      const colValues = results.filter(r => r.x === x).map(r => r.thickness[k]).filter(v => v !== null && Number.isFinite(v));
+      avgRow.push(fmt(avg(colValues), 3));
+    });
+  });
+  lines.push(avgRow.join(","));
+
+  lines.push("");
+  lines.push(["整體分析"].join(","));
+  lines.push(["Mean", "STD", "CV", "Max", "Min"].join(","));
+  lines.push([fmt(mean, 3), fmt(sd, 3), cv === null ? "—" : fmt(cv, 2) + "%", fmt(values.length ? Math.max(...values) : null, 3), fmt(values.length ? Math.min(...values) : null, 3)].join(","));
+
+  const blob = new Blob(["\uFEFF" + lines.join("\n")], {type: "text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "skived_fin_result_summary.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadResultExcel() {
+  const { results, mean, sd, cv, values } = getResultSummary();
+  const heatMin = values.length ? Math.min(...values) : null;
+  const heatMax = values.length ? Math.max(...values) : null;
+
+  let table = `
+  <html><head><meta charset="UTF-8">
+  <style>
+    body { font-family: Microsoft JhengHei, Arial, sans-serif; }
+    table { border-collapse: collapse; margin-bottom: 16px; }
+    th, td { border: 1px solid #999; padding: 6px 10px; text-align: center; }
+    th { background: #eee; }
+    .yellow { background: #fff200; font-weight: bold; }
+    .blue { color: blue; }
+  </style></head><body>
+  <h2>Skived Fin Coating 膜厚結果</h2>
+
+  <h3>測試條件</h3>
+  <table>
+    <tr><td>GAP</td><td class="blue">${escapeHtml(document.getElementById("sample").value || "")}</td></tr>
+    <tr><td>Coating</td><td class="blue">${escapeHtml(document.getElementById("coating").value || "")}</td></tr>
+    <tr><td>Date</td><td class="blue">${escapeHtml((document.getElementById("date").value || "").replaceAll("-", "/"))}</td></tr>
+    <tr><td>Time</td><td class="blue">${escapeHtml(document.getElementById("time").value || "")}</td></tr>
+    <tr><td>操作者</td><td class="blue">${escapeHtml(document.getElementById("operator").value || "")}</td></tr>
+    <tr><td>備註</td><td class="blue">${escapeHtml(document.getElementById("remark").value || "")}</td></tr>
+  </table>
+
+  <h3>位置膜厚，單位：µm</h3>
+  <table>
+    <tr><th class="yellow">位置膜厚</th><th colspan="2">左</th><th colspan="2">中</th><th colspan="2">右</th></tr>
+    <tr><th>y-axis / x-axis</th><th>fin 1</th><th>fin 2</th><th>fin 1</th><th>fin 2</th><th>fin 1</th><th>fin 2</th></tr>`;
+
+  YS.forEach(y => {
+    table += `<tr><th>水平線1<br>${y}</th>`;
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      table += excelHeatTd(r?.thickness.h1g1, heatMin, heatMax) + excelHeatTd(r?.thickness.h1g2, heatMin, heatMax);
+    });
+    table += `</tr><tr><th>水平線2<br>${y}</th>`;
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      table += excelHeatTd(r?.thickness.h2g1, heatMin, heatMax) + excelHeatTd(r?.thickness.h2g2, heatMin, heatMax);
+    });
+    table += `</tr>`;
+  });
+
+  table += `<tr><th style="color:red;background:white;font-weight:bold;">Avg</th>`;
+  XS.forEach(x => {
+    ["h1g1", "h1g2"].forEach(k => {
+      const colValues = results.filter(r => r.x === x).map(r => r.thickness[k]).filter(v => v !== null && Number.isFinite(v));
+      table += `<td style="color:red;background:white;font-weight:bold;">${fmt(avg(colValues), 3)}</td>`;
+    });
+  });
+  table += `</tr>`;
+
+  table += `</table>
+  <h3>整體分析</h3>
+  <table>
+    <tr><th>Mean</th><th>STD</th><th>CV</th><th>Max</th><th>Min</th></tr>
+    <tr><td class="blue">${fmt(mean, 3)}</td><td class="blue">${fmt(sd, 3)}</td><td class="blue">${cv === null ? "—" : fmt(cv, 2) + "%"}</td><td class="blue">${fmt(values.length ? Math.max(...values) : null, 3)}</td><td class="blue">${fmt(values.length ? Math.min(...values) : null, 3)}</td></tr>
+  </table>
+  </div>
+</div>
+</body></html>`;
+
+  const blob = new Blob(["\uFEFF" + table], {type: "application/vnd.ms-excel;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "skived_fin_result_summary.xls";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+
+function heatColorForExcel(value, min, max) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "#f8fafc";
+  if (min === max) return "#fef08a";
+  const ratio = (value - min) / (max - min);
+  if (ratio < 0.2) return "#bbf7d0";
+  if (ratio < 0.4) return "#86efac";
+  if (ratio < 0.6) return "#fef08a";
+  if (ratio < 0.8) return "#fdba74";
+  return "#fca5a5";
+}
+
+function excelHeatTd(value, min, max) {
+  return `<td style="background:${heatColorForExcel(value, min, max)}">${fmt(value)}</td>`;
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function valueColor(value, min, max) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "#f8fafc";
+  if (min === max) return "#fef08a";
+  const t = Math.max(0, Math.min(1, (value - min) / (max - min)));
+  // blue -> cyan -> green -> yellow -> orange -> red
+  const stops = [
+    [0.00, [37, 99, 235]],
+    [0.20, [6, 182, 212]],
+    [0.40, [34, 197, 94]],
+    [0.60, [250, 204, 21]],
+    [0.80, [249, 115, 22]],
+    [1.00, [239, 68, 68]]
+  ];
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [p0, c0] = stops[i];
+    const [p1, c1] = stops[i + 1];
+    if (t >= p0 && t <= p1) {
+      const r = (t - p0) / (p1 - p0);
+      const c = c0.map((v, idx) => Math.round(v + (c1[idx] - v) * r));
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+  }
+  return "rgb(239,68,68)";
+}
+
+function drawRoundRect(ctx, x, y, w, h, r, fill, stroke) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  if (fill) {
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+}
+
+function buildSurfaceGrid(results) {
+  // 8 rows × 6 columns, same as 位置膜厚熱圖
+  const grid = [];
+  YS.forEach(y => {
+    const row1 = [];
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      row1.push(r?.thickness.h1g1 ?? null, r?.thickness.h1g2 ?? null);
+    });
+    grid.push(row1);
+
+    const row2 = [];
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      row2.push(r?.thickness.h2g1 ?? null, r?.thickness.h2g2 ?? null);
+    });
+    grid.push(row2);
+  });
+  return grid;
+}
+
+function projectPoint(x, y, z, originX, originY, sx, sy, sz) {
+  // isometric-like projection
+  return {
+    x: originX + (x - y) * sx,
+    y: originY + (x + y) * sy - z * sz
+  };
+}
+
+function drawPoly(ctx, pts, fill, stroke = null, alpha = 1) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function shadeRgb(color, percent) {
+  const nums = color.match(/\d+/g);
+  if (!nums) return color;
+  const [r, g, b] = nums.map(Number);
+  const f = (v) => Math.max(0, Math.min(255, Math.round(v * (1 + percent))));
+  return `rgb(${f(r)},${f(g)},${f(b)})`;
+}
+
+function drawSurfaceCanvas(results, values) {
+  const canvas = document.getElementById("surfaceCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle = "#111827";
+  ctx.font = "bold 30px Microsoft JhengHei, Arial";
+  
+
+  if (!values.length) {
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "24px Microsoft JhengHei, Arial";
+    ctx.fillText("尚未匯入 coating 前 / 後資料", 330, 330);
+    return;
+  }
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const grid = buildSurfaceGrid(results);
+
+  // plate geometry
+  const plateX = 110;
+  const plateY = 115;
+  const plateW = 650;
+  const plateH = 500;
+  const border = 20;
+
+  // shadow
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.25)";
+  ctx.shadowBlur = 24;
+  ctx.shadowOffsetY = 16;
+  ctx.fillStyle = "#6b7280";
+  ctx.beginPath();
+  ctx.roundRect(plateX, plateY + 18, plateW, plateH, 38);
+  ctx.fill();
+  ctx.restore();
+
+  // outer frame
+  const outerGrad = ctx.createLinearGradient(plateX, plateY, plateX + plateW, plateY + plateH);
+  outerGrad.addColorStop(0, "#ef4444");
+  outerGrad.addColorStop(1, "#fb923c");
+  ctx.fillStyle = outerGrad;
+  ctx.beginPath();
+  ctx.roundRect(plateX, plateY, plateW, plateH, 38);
+  ctx.fill();
+
+  // inner plate
+  const innerX = plateX + border;
+  const innerY = plateY + border;
+  const innerW = plateW - border * 2;
+  const innerH = plateH - border * 2;
+
+  ctx.fillStyle = "#f3f4f6";
+  ctx.beginPath();
+  ctx.roundRect(innerX, innerY, innerW, innerH, 24);
+  ctx.fill();
+
+  // interpolate surface
+  function bilinear(u, v) {
+    const rows = grid.length, cols = grid[0].length;
+    const x = u * (cols - 1);
+    const y = v * (rows - 1);
+    const x0 = Math.floor(x), y0 = Math.floor(y);
+    const x1 = Math.min(cols - 1, x0 + 1);
+    const y1 = Math.min(rows - 1, y0 + 1);
+
+    const tx = x - x0;
+    const ty = y - y0;
+
+    const v00 = grid[y0][x0] ?? min;
+    const v10 = grid[y0][x1] ?? v00;
+    const v01 = grid[y1][x0] ?? v00;
+    const v11 = grid[y1][x1] ?? v10;
+
+    return (1-tx)*(1-ty)*v00 + tx*(1-ty)*v10 + (1-tx)*ty*v01 + tx*ty*v11;
+  }
+
+  // smooth heatmap
+  const rowsFine = 140;
+  const colsFine = 140;
+
+  for (let r = 0; r < rowsFine; r++) {
+    for (let c = 0; c < colsFine; c++) {
+      const u = c / colsFine;
+      const v = r / rowsFine;
+
+      const val = bilinear(u, v);
+      const color = valueColor(val, min, max);
+
+      const x = innerX + u * innerW;
+      const y = innerY + v * innerH;
+
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, innerW / colsFine + 1, innerH / rowsFine + 1);
+    }
+  }
+
+  // skived fins
+  ctx.save();
+  for (let i = 0; i < 32; i++) {
+    const x = innerX + (i + 0.5) / 32 * innerW;
+
+    const grad = ctx.createLinearGradient(x - 6, 0, x + 6, 0);
+    grad.addColorStop(0, "rgba(255,255,255,0.18)");
+    grad.addColorStop(0.5, "rgba(0,0,0,0.18)");
+    grad.addColorStop(1, "rgba(255,255,255,0.08)");
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - 6, innerY, 12, innerH);
+  }
+  ctx.restore();
+
+  // soft gloss overlay
+  const gloss = ctx.createLinearGradient(0, innerY, 0, innerY + innerH);
+  gloss.addColorStop(0, "rgba(255,255,255,0.20)");
+  gloss.addColorStop(0.35, "rgba(255,255,255,0.02)");
+  gloss.addColorStop(1, "rgba(0,0,0,0.08)");
+  ctx.fillStyle = gloss;
+  ctx.beginPath();
+  ctx.roundRect(innerX, innerY, innerW, innerH, 24);
+  ctx.fill();
+
+  // position labels
+  const posCoords = {
+    1:[0.12,0.10], 2:[0.50,0.10], 3:[0.88,0.10],
+    4:[0.12,0.36], 5:[0.50,0.36], 6:[0.88,0.36],
+    7:[0.12,0.62], 8:[0.50,0.62], 9:[0.88,0.62],
+    10:[0.12,0.88], 11:[0.50,0.88], 12:[0.88,0.88]
+  };
+
+  Object.entries(posCoords).forEach(([p, xy]) => {
+    const x = innerX + xy[0] * innerW;
+    const y = innerY + xy[1] * innerH;
+
+    ctx.beginPath();
+    ctx.arc(x, y, 18, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.fill();
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#111827";
+    ctx.font = "bold 17px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(p, x, y + 1);
+  });
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+
+  // legend
+  const lx = 830;
+  const ly = 155;
+  const lw = 34;
+  const lh = 340;
+
+  const grad = ctx.createLinearGradient(0, ly + lh, 0, ly);
+  for (let i = 0; i <= 1; i += 0.05) {
+    grad.addColorStop(i, valueColor(min + (max - min) * i, min, max));
+  }
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(lx, ly, lw, lh);
+  ctx.strokeStyle = "#64748b";
+  ctx.strokeRect(lx, ly, lw, lh);
+
+  ctx.fillStyle = "#111827";
+  ctx.font = "bold 18px Microsoft JhengHei, Arial";
+  ctx.fillText("膜厚 (µm)", lx - 12, ly - 18);
+
+  ctx.font = "16px Arial";
+  const ticks = 5;
+  for (let i = 0; i <= ticks; i++) {
+    const t = i / ticks;
+    const y = ly + lh - t * lh;
+    const val = min + t * (max - min);
+
+    ctx.beginPath();
+    ctx.moveTo(lx + lw, y);
+    ctx.lineTo(lx + lw + 8, y);
+    ctx.stroke();
+
+    ctx.fillText(fmt(val, 0), lx + lw + 14, y + 5);
+  }
+
+  ctx.fillStyle = "#475569";
+  ctx.font = "16px Microsoft JhengHei, Arial";
+  ctx.fillText("說明：使用目前膜厚數據進行平滑內插，顏色代表膜厚高低分布。", 36, 690);
+}
+
+function drawHistogramCanvas(values) {
+  const canvas = document.getElementById("histCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle = "#111827";
+  ctx.font = "bold 30px Microsoft JhengHei, Arial";
+  
+
+  if (!values.length) {
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "24px Microsoft JhengHei, Arial";
+    ctx.fillText("尚未匯入 coating 前 / 後資料", 330, 330);
+    return;
+  }
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const binCount = 7;
+  const span = max - min || 1;
+  const bins = Array(binCount).fill(0);
+  values.forEach(v => {
+    let idx = Math.floor((v - min) / span * binCount);
+    if (idx >= binCount) idx = binCount - 1;
+    bins[idx]++;
+  });
+  const percents = bins.map(c => c / values.length * 100);
+  const maxPercent = Math.max(...percents);
+  const yMax = Math.ceil(maxPercent / 5) * 5 || 5;
+
+  const left = 115, top = 105, chartW = 770, chartH = 420;
+  const bottom = top + chartH;
+
+  ctx.fillStyle = "#111827";
+  ctx.font = "bold 20px Microsoft JhengHei, Arial";
+  ctx.textAlign = "center";
+  
+
+  ctx.textAlign = "right";
+  ctx.font = "15px Arial";
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.fillStyle = "#334155";
+  for (let i = 0; i <= 5; i++) {
+    const y = bottom - i / 5 * chartH;
+    const label = yMax * i / 5;
+    ctx.beginPath();
+    ctx.moveTo(left, y);
+    ctx.lineTo(left + chartW, y);
+    ctx.stroke();
+    ctx.fillText(`${fmt(label, 0)}%`, left - 18, y + (i === 5 ? 14 : 5));
+  }
+
+  ctx.strokeStyle = "#64748b";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(left, top);
+  ctx.lineTo(left, bottom);
+  ctx.lineTo(left + chartW, bottom);
+  ctx.stroke();
+
+  ctx.fillStyle = "#111827";
+  ctx.font = "17px Microsoft JhengHei, Arial";
+  ctx.textAlign = "left";
+  ctx.fillText("比例 (%)", left - 92, top - 12);
+
+  const barGap = 14;
+  const step = chartW / binCount;
+  const barW = step - barGap;
+
+  percents.forEach((pct, i) => {
+    const h = pct / yMax * chartH;
+    const x = left + i * step + barGap / 2;
+    const y = bottom - h;
+    const mid = min + (i + 0.5) * span / binCount;
+
+    const g = ctx.createLinearGradient(0, y, 0, bottom);
+    const color = valueColor(mid, min, max);
+    g.addColorStop(0, color);
+    g.addColorStop(1, shadeRgb(color, -0.12));
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, barW, h);
+    ctx.strokeStyle = "rgba(15,23,42,0.20)";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x, y, barW, h);
+
+    ctx.fillStyle = "#334155";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(`${fmt(pct, 1)}%`, x + barW / 2, y - 9);
+
+    const a = min + i * span / binCount;
+    const b = min + (i + 1) * span / binCount;
+    ctx.save();
+    ctx.translate(x + barW / 2, bottom + 30);
+    ctx.rotate(-0.30);
+    ctx.fillStyle = "#111827";
+    ctx.font = "14px Arial";
+    ctx.fillText(`${fmt(a,0)}-${fmt(b,0)}`, 0, 0);
+    ctx.restore();
+  });
+
+  ctx.fillStyle = "#111827";
+  ctx.font = "17px Microsoft JhengHei, Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("膜厚 (µm)", left + chartW / 2, bottom + 78);
+
+  const m = avg(values);
+  const sd = stdSample(values);
+  ctx.fillStyle = "#475569";
+  ctx.font = "15px Microsoft JhengHei, Arial";
+  ctx.textAlign = "left";
+  ctx.fillText(`Mean: ${fmt(m, 1)} µm    STD: ${fmt(sd, 1)} µm    n = ${values.length}`, 36, 618);
+}
+
+
+
+const PLOTLY_TOP_VIEW_CAMERA = {
+  eye: { x: 0, y: 0, z: 2.35 },
+  up: { x: 0, y: 1, z: 0 },
+  center: { x: 0, y: 0, z: 0 }
+};
+
+function resetPlotlyTopView() {
+  if (typeof Plotly === "undefined") {
+    alert("Plotly.js 尚未載入，無法復位視角。");
+    return;
+  }
+
+  const plot = document.getElementById("plotly3d");
+  if (!plot || !plot.data) {
+    alert("請先匯入資料並生成 3D 曲面圖。");
+    return;
+  }
+
+  Plotly.relayout("plotly3d", {
+    "scene.camera": PLOTLY_TOP_VIEW_CAMERA
+  });
+}
+
+
+function buildPlotlyZGrid(results) {
+  const z = [];
+
+  YS.forEach(y => {
+    const row1 = [];
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      row1.push(r?.thickness.h1g1 ?? null);
+      row1.push(r?.thickness.h1g2 ?? null);
+    });
+    z.push(row1);
+
+    const row2 = [];
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      row2.push(r?.thickness.h2g1 ?? null);
+      row2.push(r?.thickness.h2g2 ?? null);
+    });
+    z.push(row2);
+  });
+
+  return z;
+}
+
+function drawPlotlySurface(results, values) {
+  const plot = document.getElementById("plotly3d");
+  if (!plot) return;
+
+  if (typeof Plotly === "undefined") {
+    plot.innerHTML = `
+      <div style="padding:24px;color:#6b7280;">
+        Plotly.js 尚未載入。請確認此頁面可連線到網路，因為此版本使用 CDN 載入 Plotly。
+      </div>`;
+    return;
+  }
+
+  if (!values.length) {
+    Plotly.purge("plotly3d");
+    plot.innerHTML = `
+      <div style="padding:24px;color:#6b7280;">
+        尚未匯入 coating 前 / 後資料。
+      </div>`;
+    return;
+  }
+
+  const z = buildPlotlyZGrid(results);
+
+  // X：左→右，共 6 欄。Y：上→下，共 8 列。
+  // 為了讓俯視時「上」真的在圖的上方，Y 座標採反向配置。
+  const xVals = [0, 1, 2, 3, 4, 5];
+  const yVals = [7, 6, 5, 4, 3, 2, 1, 0];
+
+  const zMin = Math.min(...values);
+  const zMax = Math.max(...values);
+  const zLabel = zMax + (zMax - zMin || 1) * 0.08;
+
+  const data = [{
+    z: z,
+    x: xVals,
+    y: yVals,
+    type: "surface",
+    colorscale: [
+      [0.00, "#2563eb"],
+      [0.20, "#06b6d4"],
+      [0.40, "#22c55e"],
+      [0.60, "#facc15"],
+      [0.80, "#f97316"],
+      [1.00, "#ef4444"]
+    ],
+    colorbar: {
+      title: "膜厚<br>µm",
+      thickness: 18,
+      len: 0.72
+    },
+    contours: {
+      z: {
+        show: true,
+        usecolormap: true,
+        highlightcolor: "#111827",
+        project: { z: true }
+      }
+    },
+    hovertemplate: "膜厚: %{z:.2f} µm<extra></extra>"
+  }];
+
+  const layout = {
+    autosize: true,
+    margin: { l: 18, r: 18, b: 18, t: 18 },
+    paper_bgcolor: "white",
+    plot_bgcolor: "white",
+    scene: {
+      xaxis: {
+        title: "",
+        showticklabels: false,
+        showgrid: false,
+        zeroline: false,
+        showbackground: false,
+        ticks: "",
+        visible: false,
+        range: [-1.45, 6.30]
+      },
+      yaxis: {
+        title: "",
+        showticklabels: false,
+        showgrid: false,
+        zeroline: false,
+        showbackground: false,
+        ticks: "",
+        visible: false,
+        range: [-1.45, 8.55]
+      },
+      zaxis: {
+        title: "",
+        showticklabels: false,
+        showgrid: false,
+        zeroline: false,
+        showbackground: false,
+        ticks: "",
+        visible: false
+      },
+      camera: PLOTLY_TOP_VIEW_CAMERA,
+      aspectratio: { x: 1.7, y: 1.25, z: 0.35 },
+      annotations: [
+        {
+          text: "<b>左</b>",
+          x: 0.05,
+          y: 8.42,
+          z: zLabel,
+          showarrow: false,
+          font: { size: 18, color: "#111827" }
+        },
+        {
+          text: "<b>右</b>",
+          x: 4.95,
+          y: 8.42,
+          z: zLabel,
+          showarrow: false,
+          font: { size: 18, color: "#111827" }
+        },
+        {
+          text: "<b>上</b>",
+          x: -1.25,
+          y: 7.00,
+          z: zLabel,
+          showarrow: false,
+          font: { size: 18, color: "#111827" }
+        },
+        {
+          text: "<b>下</b>",
+          x: -1.25,
+          y: 0.00,
+          z: zLabel,
+          showarrow: false,
+          font: { size: 18, color: "#111827" }
+        }
+      ]
+    }
+  };
+
+  Plotly.react("plotly3d", data, layout, {
+    responsive: true,
+    displaylogo: false,
+    modeBarButtonsToRemove: ["lasso2d", "select2d"]
+  });
+}
+
+
+function downloadPlotlyPNG() {
+  if (typeof Plotly === "undefined") {
+    alert("Plotly.js 尚未載入，無法匯出圖片。");
+    return;
+  }
+
+  const plot = document.getElementById("plotly3d");
+  if (!plot || !plot.data) {
+    alert("請先匯入資料並生成 3D 曲面圖。");
+    return;
+  }
+
+  Plotly.downloadImage("plotly3d", {
+    format: "png",
+    filename: "skived_fin_webgl_3d_surface",
+    width: 1400,
+    height: 900,
+    scale: 2
+  });
+}
+
+
+function drawGeneratedCharts(results, values) {
+  drawSurfaceCanvas(results, values);
+  drawHistogramCanvas(values);
+}
+
+function downloadCanvasPNG(canvasId, filename) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/png");
+  a.download = filename;
+  a.click();
+}
+
+function reportHeatCell(value, min, max) {
+  const bg = heatColorForExcel(value, min, max);
+  return `<td style="background:${bg}; font-weight:600;">${fmt(value)}</td>`;
+}
+
+function buildHeatmapRowsForReport(results, values) {
+  const heatMin = values.length ? Math.min(...values) : null;
+  const heatMax = values.length ? Math.max(...values) : null;
+  let rowsHtml = "";
+
+  YS.forEach(y => {
+    const row1 = [`<th>水平線1<br>${y}</th>`];
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      row1.push(
+        reportHeatCell(r?.thickness.h1g1, heatMin, heatMax),
+        reportHeatCell(r?.thickness.h1g2, heatMin, heatMax)
+      );
+    });
+    rowsHtml += `<tr>${row1.join("")}</tr>`;
+
+    const row2 = [`<th>水平線2<br>${y}</th>`];
+    XS.forEach(x => {
+      const r = results.find(v => v.y === y && v.x === x);
+      row2.push(
+        reportHeatCell(r?.thickness.h2g1, heatMin, heatMax),
+        reportHeatCell(r?.thickness.h2g2, heatMin, heatMax)
+      );
+    });
+    rowsHtml += `<tr>${row2.join("")}</tr>`;
+  });
+
+  rowsHtml += `<tr><th style="color:red;background:white;font-weight:800;">Avg</th>`;
+  XS.forEach(x => {
+    ["h1g1", "h1g2"].forEach(k => {
+      const colValues = results.filter(r => r.x === x).map(r => r.thickness[k]).filter(v => v !== null && Number.isFinite(v));
+      rowsHtml += `<td style="color:red;background:white;font-weight:800;">${fmt(avg(colValues), 3)}</td>`;
+    });
+  });
+  rowsHtml += `</tr>`;
+  return rowsHtml;
+}
+
+function exportPDFReport() {
+  try {
+    render();
+
+    const summary = getResultSummary();
+    const results = summary.results;
+    const values = summary.values;
+    const mean = summary.mean;
+    const sd = summary.sd;
+    const cv = mean ? sd / mean * 100 : null;
+    const maxValue = values.length ? Math.max(...values) : null;
+    const minValue = values.length ? Math.min(...values) : null;
+
+    const surfaceCanvas = document.getElementById("surfaceCanvas");
+    const histCanvas = document.getElementById("histCanvas");
+    const surfaceImg = surfaceCanvas ? surfaceCanvas.toDataURL("image/png") : "";
+    const histImg = histCanvas ? histCanvas.toDataURL("image/png") : "";
+    const dateValue = (document.getElementById("date").value || "").replaceAll("-", "/");
+
+    const reportHtml = `
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>Skived Fin Coating 膜厚分析報告</title>
+<style>
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+html,
+body {
+  width: 297mm;
+  height: 210mm;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: white;
+  font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+  color: #111827;
+}
+
+.page {
+  position: relative;
+  width: 297mm;
+  height: 210mm;
+  overflow: hidden;
+  background: white;
+}
+
+/* ===== Absolute layout: locked to match target reference image ===== */
+.title {
+  position: absolute;
+  left: 3.5mm;
+  top: 3.2mm;
+  width: 290mm;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  padding-bottom: 3.2mm;
+  border-bottom: 2.3px solid #2563eb;
+}
+
+.section-title {
+  position: absolute;
+  font-size: 12.4px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.cond-title { left: 3.5mm; top: 18.3mm; }
+.summary-title { left: 3.5mm; top: 69.2mm; }
+.heat-title { left: 98.5mm; top: 18.3mm; }
+.surface-title { left: 3.5mm; top: 104.7mm; }
+.hist-title { left: 148.0mm; top: 104.7mm; }
+
+table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: white;
+}
+
+th,
+td {
+  border: 1px solid #9ca3af;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  font-weight: 700;
+}
+
+th {
+  background: #f3f4f6;
+}
+
+.cond-table {
+  position: absolute;
+  left: 3.5mm;
+  top: 24.0mm;
+  width: 90mm;
+}
+
+.cond-table th,
+.cond-table td {
+  height: 4.95mm;
+  font-size: 8.4px;
+  line-height: 1.02;
+  padding: 0.72mm 1.0mm;
+}
+
+.cond-table th { width: 42mm; }
+.cond-table td { width: 48mm; }
+
+.summary-table {
+  position: absolute;
+  left: 3.5mm;
+  top: 76.2mm;
+  width: 92mm;
+}
+
+.summary-table th,
+.summary-table td {
+  height: 7.4mm;
+  font-size: 9px;
+  line-height: 1.05;
+  padding: 0.8mm 0.7mm;
+}
+
+.summary-table th,
+.summary-table td {
+  width: 18.4mm;
+}
+
+.heat-table {
+  position: absolute;
+  left: 98.5mm;
+  top: 24.0mm;
+  width: 195mm;
+}
+
+.heat-table th,
+.heat-table td {
+  height: 6.25mm;
+  font-size: 8.8px;
+  line-height: 1.03;
+  padding: 0.72mm 0.9mm;
+}
+
+.heat-table th:first-child,
+.heat-table td:first-child {
+  width: 29mm;
+}
+
+.heat-table th:not(:first-child),
+.heat-table td:not(:first-child) {
+  width: 27.65mm;
+}
+
+.blue {
+  color: #0000ff;
+  font-weight: 800;
+}
+
+.max {
+  color: #ff0000;
+  font-weight: 800;
+}
+
+.min {
+  color: #00a651;
+  font-weight: 800;
+}
+
+.chart-card {
+  position: absolute;
+  height: 88.5mm;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: white;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.surface-card {
+  left: 3.5mm;
+  top: 111.0mm;
+  width: 141.5mm;
+}
+
+.hist-card {
+  left: 148.0mm;
+  top: 111.0mm;
+  width: 145.5mm;
+}
+
+.chart-card img {
+  max-width: 96%;
+  max-height: 84.5mm;
+  object-fit: contain;
+  display: block;
+}
+
+@media print {
+  html,
+  body,
+  .page {
+    width: 297mm !important;
+    height: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .page {
+    page-break-before: avoid;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+  <div class="title">Skived Fin Coating 膜厚分析報告</div>
+
+  <div class="section-title cond-title">測試條件</div>
+  <table class="cond-table">
+    <tr><th>GAP</th><td class="blue">${escapeHtml(document.getElementById("sample").value || "—")}</td></tr>
+    <tr><th>Coating</th><td class="blue">${escapeHtml(document.getElementById("coating").value || "—")}</td></tr>
+    <tr><th>Date</th><td class="blue">${escapeHtml(dateValue || "—")}</td></tr>
+    <tr><th>Time</th><td class="blue">${escapeHtml(document.getElementById("time").value || "—")}</td></tr>
+    <tr><th>操作者</th><td class="blue">${escapeHtml(document.getElementById("operator").value || "—")}</td></tr>
+    <tr><th>備註</th><td class="blue">${escapeHtml(document.getElementById("remark").value || "—")}</td></tr>
+  </table>
+
+  <div class="section-title summary-title">整體分析</div>
+  <table class="summary-table">
+    <tr>
+      <th>Mean</th>
+      <th>STD</th>
+      <th>CV</th>
+      <th>Max</th>
+      <th>Min</th>
+    </tr>
+    <tr>
+      <td class="blue">${fmt(mean, 3)}</td>
+      <td class="blue">${fmt(sd, 3)}</td>
+      <td class="blue">${cv === null ? "—" : fmt(cv, 2) + "%"}</td>
+      <td class="max">${fmt(maxValue, 3)}</td>
+      <td class="min">${fmt(minValue, 3)}</td>
+    </tr>
+  </table>
+
+  <div class="section-title heat-title">位置膜厚熱圖數據（ µm ）</div>
+  <table class="heat-table">
+    <tr>
+      <th>位置</th>
+      <th colspan="2">左</th>
+      <th colspan="2">中</th>
+      <th colspan="2">右</th>
+    </tr>
+    <tr>
+      <th>Y/X</th>
+      <th>fin 1</th><th>fin 2</th>
+      <th>fin 1</th><th>fin 2</th>
+      <th>fin 1</th><th>fin 2</th>
+    </tr>
+    ${buildHeatmapRowsForReport(results, values)}
+  </table>
+
+  <div class="section-title surface-title">位置膜厚 3D 色溫圖</div>
+  <div class="chart-card surface-card">
+    <img src="${surfaceImg}">
+  </div>
+
+  <div class="section-title hist-title">膜厚統計分布</div>
+  <div class="chart-card hist-card">
+    <img src="${histImg}">
+  </div>
+</div>
+
+<script>
+window.onload = function() {
+  setTimeout(function() {
+    window.print();
+  }, 450);
+};
+<\/script>
+
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+
+    if (!win) {
+      alert("瀏覽器阻擋了彈出視窗，請允許彈出視窗後再試一次。");
+      return;
+    }
+
+    win.document.open();
+    win.document.write(reportHtml);
+    win.document.close();
+
+  } catch (err) {
+    console.error(err);
+    alert("PDF 報告產生失敗，請重新整理頁面後再試一次。");
+  }
+}
+
+function downloadCSV() {
+  const results = calculate();
+  const values = results.flatMap(r => KEYS.map(k => r.thickness[k])).filter(v => v !== null);
+  const mean = avg(values);
+  const sd = stdSample(values);
+  const cv = mean ? sd / mean * 100 : null;
+
+  const lines = [];
+  lines.push(["位置", "Y", "X", "水平線1-1", "水平線1-2", "水平線2-1", "水平線2-2", "位置平均"].join(","));
+  results.forEach(r => {
+    lines.push([
+      r.position, r.y, r.x,
+      ...KEYS.map(k => fmt(r.thickness[k])),
+      fmt(r.posAvg)
+    ].join(","));
+  });
+  lines.push("");
+  lines.push(["Mean", fmt(mean, 3)].join(","));
+  lines.push(["STD", fmt(sd, 3)].join(","));
+  lines.push(["CV", cv === null ? "—" : fmt(cv, 2) + "%"].join(","));
+
+  const blob = new Blob(["\uFEFF" + lines.join("\n")], {type: "text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "skived_fin_coating_thickness.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+
+const STORAGE_KEY = "skived_fin_coating_tool_saved_state_v1";
+const STORAGE_LIST_KEY = "skived_fin_coating_tool_saved_records_v2";
+const MAX_SAVED_RECORDS = 30;
+
+function collectState() {
+  return {
+    version: "two-groove-v2",
+    savedAt: new Date().toISOString(),
+    fields: {
+      sample: document.getElementById("sample").value || "",
+      coating: document.getElementById("coating").value || "",
+      date: document.getElementById("date").value || "",
+      time: document.getElementById("time").value || "",
+      operator: document.getElementById("operator").value || "",
+      remark: document.getElementById("remark").value || ""
+    },
+    beforePaste: document.getElementById("beforePaste").value || "",
+    afterPaste: document.getElementById("afterPaste").value || "",
+    rows: rows
+  };
+}
+
+function makeRecordTitle(state) {
+  const f = state.fields || {};
+  const saved = formatSavedTime(state.savedAt || new Date().toISOString());
+  const parts = [saved, f.sample, f.coating, f.date, f.time].filter(Boolean);
+  return parts.join("｜");
+}
+
+function formatSavedTime(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso || "未命名時間";
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function readSavedRecords() {
+  const records = [];
+  try {
+    const rawList = localStorage.getItem(STORAGE_LIST_KEY);
+    if (rawList) {
+      const parsed = JSON.parse(rawList);
+      if (Array.isArray(parsed)) records.push(...parsed.filter(v => v && typeof v === "object"));
+    }
+
+    // 舊版只會存一筆，這裡自動相容舊資料，但不重複加入清單。
+    const oldRaw = localStorage.getItem(STORAGE_KEY);
+    if (oldRaw) {
+      const oldState = JSON.parse(oldRaw);
+      if (oldState && typeof oldState === "object") {
+        const exists = records.some(r => r.savedAt === oldState.savedAt);
+        if (!exists) records.push(oldState);
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return records
+    .filter(r => r && r.savedAt)
+    .sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+}
+
+function writeSavedRecords(records) {
+  localStorage.setItem(STORAGE_LIST_KEY, JSON.stringify(records.slice(0, MAX_SAVED_RECORDS)));
+}
+
+function applySavedState(state, message = "已載入儲存資料。") {
+  if (!state || typeof state !== "object") return false;
+
+  const fields = state.fields || {};
+  
+
+const CLOUD_API_URL_KEY = "skived_fin_cloud_worker_api_url_v1";
+let currentCloudRecordId = null;
+let currentCloudShortId = null;
+
+function getCloudApiUrl() {
+  return (localStorage.getItem(CLOUD_API_URL_KEY) || "").replace(/\/+$/, "");
+}
+
+function configureCloudApi() {
+  const current = getCloudApiUrl();
+  const value = prompt("請輸入 Cloudflare Worker API 網址，例如：https://your-worker.yourname.workers.dev", current);
+  if (value === null) return;
+  const cleaned = value.trim().replace(/\/+$/, "");
+  if (!cleaned) {
+    localStorage.removeItem(CLOUD_API_URL_KEY);
+    setSaveStatus("已清除雲端 API 設定。");
+    return;
+  }
+  if (!/^https?:\/\//i.test(cleaned)) {
+    alert("網址格式需以 http:// 或 https:// 開頭。");
+    return;
+  }
+  localStorage.setItem(CLOUD_API_URL_KEY, cleaned);
+  setSaveStatus("已設定雲端 API：" + cleaned);
+}
+
+function ensureCloudApiUrl() {
+  let api = getCloudApiUrl();
+  if (!api) {
+    configureCloudApi();
+    api = getCloudApiUrl();
+  }
+  return api;
+}
+
+function collectStateWithSummary() {
+  const state = collectState();
+  const summary = getResultSummary();
+  state.summary = { mean: summary.mean, std: summary.sd, cv: summary.cv, count: summary.values.length };
+  return state;
+}
+
+async function cloudFetch(path, options = {}) {
+  const api = ensureCloudApiUrl();
+  if (!api) throw new Error("尚未設定雲端 API 網址。");
+  const res = await fetch(api + path, {
+    ...options,
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) }
+  });
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text }; }
+  if (!res.ok) throw new Error(data && data.error ? data.error : (text || "雲端 API 錯誤"));
+  return data;
+}
+
+async function saveToCloud() {
+  try {
+    const state = collectStateWithSummary();
+    const data = await cloudFetch("/api/records", { method: "POST", body: JSON.stringify(state) });
+    currentCloudRecordId = data.id;
+    currentCloudShortId = data.shortId;
+    setSaveStatus(`雲端儲存完成：ID ${data.shortId}。可用「複製雲端短連結」分享。`);
+  } catch (err) {
+    console.error(err);
+    alert("雲端儲存失敗：" + err.message);
+  }
+}
+
+function makeCloudRecordLabel(item) {
+  const parts = [item.savedAt ? formatSavedTime(item.savedAt) : "未命名時間", item.sample, item.coating, item.testDate, item.testTime, item.shortId ? "ID " + item.shortId : ""].filter(Boolean);
+  return parts.join("｜");
+}
+
+async function openCloudSearch() {
+  try {
+    const q = prompt("輸入搜尋關鍵字，可用 GAP、Coating、操作者、備註、短網址 ID；留空則列出最近資料。", "");
+    if (q === null) return;
+    const data = await cloudFetch(`/api/records?query=${encodeURIComponent(q.trim())}&limit=25`, { method: "GET" });
+    const records = data.records || [];
+    if (!records.length) { alert("雲端資料庫查無資料。"); return; }
+    const listText = records.map((r, idx) => `${idx + 1}. ${makeCloudRecordLabel(r)}`).join("\n");
+    const answer = prompt(`請輸入要載入的雲端資料編號：\n\n${listText}`, "1");
+    if (answer === null) return;
+    const index = Number(answer.trim()) - 1;
+    if (!Number.isInteger(index) || index < 0 || index >= records.length) { alert("編號不正確。"); return; }
+    await loadCloudRecord(records[index].shortId || records[index].id);
+  } catch (err) {
+    console.error(err);
+    alert("雲端查詢/載入失敗：" + err.message);
+  }
+}
+
+async function loadCloudRecord(idOrShortId) {
+  const data = await cloudFetch(`/api/records/${encodeURIComponent(idOrShortId)}`, { method: "GET" });
+  const state = data.payload;
+  currentCloudRecordId = data.id;
+  currentCloudShortId = data.shortId;
+  applySavedState(state, `已從 Notion 雲端載入：ID ${data.shortId}`);
+}
+
+async function copyCloudShareLink() {
+  try {
+    if (!currentCloudShortId) {
+      const saveNow = confirm("目前資料尚未有雲端短網址 ID。是否先儲存到 Notion 雲端？");
+      if (!saveNow) return;
+      await saveToCloud();
+    }
+    if (!currentCloudShortId) return;
+    const api = getCloudApiUrl();
+    const base = location.href.split("#")[0];
+    const url = api ? `${api}/s/${encodeURIComponent(currentCloudShortId)}` : `${base}#cloud=${encodeURIComponent(currentCloudShortId)}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      setSaveStatus(`已複製雲端短連結：${url}`);
+    } else {
+      prompt("請複製以下雲端短連結：", url);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("複製雲端短連結失敗：" + err.message);
+  }
+}
+
+async function loadCloudStateFromHashIfNeeded() {
+  const hash = location.hash || "";
+  if (!hash.startsWith("#cloud=")) return false;
+  const shortId = decodeURIComponent(hash.replace("#cloud=", ""));
+  try { await loadCloudRecord(shortId); return true; }
+  catch (err) {
+    console.error(err);
+    alert("雲端分享連結載入失敗：" + err.message + "\n\n請確認已設定正確的 Cloudflare Worker API 網址。");
+    return false;
+  }
+}
+
+["sample", "coating", "date", "time", "operator", "remark"].forEach(id => {
+    if (Object.prototype.hasOwnProperty.call(fields, id)) {
+      document.getElementById(id).value = fields[id] || "";
+    }
+  });
+
+  document.getElementById("beforePaste").value = state.beforePaste || "";
+  document.getElementById("afterPaste").value = state.afterPaste || "";
+
+  if (Array.isArray(state.rows) && state.rows.length === 12) {
+    rows = normalizeRows(state.rows);
+  } else {
+    const b = parsePastedData(state.beforePaste || "");
+    const a = parsePastedData(state.afterPaste || "");
+    rows = rows.map((r, idx) => ({
+      ...r,
+      before: b[idx],
+      after: a[idx]
+    }));
+  }
+
+  render();
+  setSaveStatus(message);
+  return true;
+}
+
+function normalizeRows(sourceRows) {
+  return POSITIONS.map((p, idx) => {
+    const src = sourceRows[idx] || {};
+    const base = {
+      position: p,
+      before: {h1g1:"", h1g2:"", h2g1:"", h2g2:""},
+      after: {h1g1:"", h1g2:"", h2g1:"", h2g2:""}
+    };
+    ["before", "after"].forEach(phase => {
+      KEYS.forEach(k => {
+        if (src[phase] && Object.prototype.hasOwnProperty.call(src[phase], k)) {
+          base[phase][k] = src[phase][k];
+        }
+      });
+    });
+    return base;
+  });
+}
+
+function setSaveStatus(msg) {
+  const el = document.getElementById("saveStatus");
+  if (!el) return;
+  el.textContent = msg || "";
+  if (msg) {
+    clearTimeout(window.__saveStatusTimer);
+    window.__saveStatusTimer = setTimeout(() => {
+      el.textContent = "";
+    }, 7000);
+  }
+}
+
+
+
+
+
+function compactStateForUrl(state) {
+  // 分享連結只放必要欄位與 12×4×2 數值，不放原始貼上文字，因此網址會比舊版短很多。
+  return {
+    v: 3,
+    f: state.fields || {},
+    r: (state.rows || []).map(row => [
+      KEYS.map(k => row.before?.[k] ?? ""),
+      KEYS.map(k => row.after?.[k] ?? "")
+    ])
+  };
+}
+
+function expandCompactState(data) {
+  if (!data || typeof data !== "object") return null;
+  if (data.v !== 3 || !Array.isArray(data.r)) return data;
+  return {
+    version: "two-groove-v2-share",
+    savedAt: new Date().toISOString(),
+    fields: data.f || {},
+    beforePaste: "",
+    afterPaste: "",
+    rows: POSITIONS.map((p, idx) => {
+      const pair = data.r[idx] || [];
+      const beforeArr = pair[0] || [];
+      const afterArr = pair[1] || [];
+      const before = {}, after = {};
+      KEYS.forEach((k, i) => {
+        before[k] = beforeArr[i] ?? "";
+        after[k] = afterArr[i] ?? "";
+      });
+      return { position: p, before, after };
+    })
+  };
+}
+
+function encodeStateForUrl(state) {
+  const json = JSON.stringify(compactStateForUrl(state));
+  const base64 = btoa(unescape(encodeURIComponent(json)));
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function decodeStateFromUrl(text) {
+  const normalized = String(text).replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
+  const data = JSON.parse(decodeURIComponent(escape(atob(padded))));
+  return expandCompactState(data);
+}
+
+async function copyShareLink() {
+  try {
+    const encoded = encodeStateForUrl(collectState());
+    const base = location.href.split("#")[0];
+    const url = `${base}#s=${encoded}`;
+
+    if (url.length > 60000) {
+      alert("目前資料量仍可能讓網址過長。此單一 HTML 無伺服器後端，所以無法產生真正的短網址；建議改用本機儲存後在同一台電腦載入，或將此 HTML 檔放到公司內部網頁/雲端空間後再分享網址。");
+      return;
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      setSaveStatus(`已複製較短分享連結，長度約 ${url.length.toLocaleString()} 字元。對方開啟後會自動帶入目前資料。`);
+    } else {
+      prompt("請複製以下分享連結：", url);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("產生分享連結失敗。此單一 HTML 沒有外部短網址服務，無法自動建立真正短網址。");
+  }
+}
+
+function loadStateFromHash() {
+  try {
+    const hash = location.hash || "";
+    if (hash.startsWith("#s=")) {
+      const encoded = hash.replace("#s=", "");
+      const state = decodeStateFromUrl(encoded);
+      return applySavedState(state, "已從分享連結載入資料。");
+    }
+    if (hash.startsWith("#state=")) {
+      // 相容舊版分享連結。
+      const encoded = hash.replace("#state=", "");
+      const state = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      return applySavedState(state, "已從舊版分享連結載入資料。");
+    }
+    return false;
+  } catch (err) {
+    console.error(err);
+    alert("分享連結資料讀取失敗。");
+    return false;
+  }
+}
+
+function safeFileNamePart(s) {
+  return String(s || "")
+    .trim()
+    .replace(/[\\/:*?"<>|#%&{}$!'@+`=]/g, "_")
+    .replace(/\s+/g, "_")
+    .slice(0, 80) || "saved";
+}
+
+["sample", "coating", "date", "time", "operator", "remark"].forEach(id => {
+  document.getElementById(id).addEventListener("input", render);
+});
+
+(async function initApp() {
+  if (location.hash && location.hash.startsWith("#cloud=")) {
+    const ok = await loadCloudStateFromHashIfNeeded();
+    if (!ok) render();
+    return;
+  }
+  if (!loadStateFromHash()) render();
+})();
+</script>
+</div>
+</div>
+</body>
+</html>
